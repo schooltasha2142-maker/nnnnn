@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NMT Math 2026 — Підготовка до НМТ з математики</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .topic-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f59e0b;
+            animation: confetti 1s ease-out forwards;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        .hint-reveal {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .hint-reveal.active {
+            max-height: 500px;
+        }
+        
+        .math-input {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .timer-warning {
+            animation: timer-pulse 1s ease-in-out infinite;
+        }
+        @keyframes timer-pulse {
+            0%, 100% { color: #ef4444; }
+            50% { color: #b91c1c; }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #4f46e5;
+            border: 2px solid #4f46e5;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #eef2ff;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('home')">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">∑</div>
+                    <span class="font-bold text-xl text-slate-800 hidden sm:block">NMT Math 2026</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-1">
+                    <button onclick="showScreen('topics')" class="nav-btn px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition">Теми</button>
+                    <button onclick="showScreen('trainer')" class="nav-btn px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition">Тренажер</button>
+                    <button onclick="showScreen('exam')" class="nav-btn px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition">Екзамен</button>
+                    <button onclick="showScreen('theory')" class="nav-btn px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition">Теорія</button>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <div class="hidden sm:flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg">
+                        <span class="text-xs text-slate-600">Рівень</span>
+                        <span id="level-display" class="font-bold text-indigo-600">1</span>
+                        <div class="w-12 h-1.5 bg-slate-300 rounded-full overflow-hidden">
+                            <div id="xp-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <button onclick="showScreen('profile')" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white font-bold shadow-md hover:shadow-lg transition flex items-center justify-center">Я</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
+
+        <!-- Home Screen -->
+        <div id="screen-home" class="screen active">
+            <div class="text-center py-12 lg:py-20">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+                    Готуйся до <span class="text-transparent bg-clip-text gradient-bg">НМТ 2026</span><br>з математики
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+                    Інтерактивна платформа з 8 темами, адаптивним тренажером та симуляцією іспиту. 
+                    Відстежуй прогрес та отримуй 200 балів!
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16 max-w-md mx-auto sm:max-w-none">
+                    <button onclick="startExam()" class="btn-primary px-8 py-4 rounded-xl font-semibold text-lg shadow-lg">
+                        📝 Симуляція НМТ
+                    </button>
+                    <button onclick="showScreen('trainer')" class="btn-secondary px-8 py-4 rounded-xl font-semibold text-lg">
+                        🎯 Почати тренування
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition">
+                        <div class="text-3xl font-bold text-indigo-600" id="stat-total-solved">0</div>
+                        <div class="text-sm text-slate-600 mt-1">Вирішено завдань</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition">
+                        <div class="text-3xl font-bold text-emerald-600" id="stat-accuracy">0%</div>
+                        <div class="text-sm text-slate-600 mt-1">Точність</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition">
+                        <div class="text-3xl font-bold text-amber-600" id="stat-streak">0</div>
+                        <div class="text-sm text-slate-600 mt-1">Днів поспіль</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition">
+                        <div class="text-3xl font-bold text-purple-600" id="stat-badges">0</div>
+                        <div class="text-sm text-slate-600 mt-1">Досягнень</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topics Preview -->
+            <div class="mt-16">
+                <h2 class="text-2xl font-bold text-slate-900 mb-8 text-center">8 тем НМТ 2026</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="topics-grid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Screen -->
+        <div id="screen-topics" class="screen">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900">Обери тему для вивчення</h2>
+                <p class="text-slate-600 mt-2">Натискай на тему, щоб розпочати тренування</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="topics-detailed">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Trainer Screen -->
+        <div id="screen-trainer" class="screen">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">Тренажер завдань</h2>
+                        <p class="text-slate-600 mt-1" id="trainer-topic-name">Загальний режим</p>
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <select id="trainer-filter" onchange="filterTrainer()" class="flex-1 sm:flex-none px-4 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="all">Всі теми</option>
+                            <option value="0">Числа та вирази</option>
+                            <option value="1">Рівняння та нерівності</option>
+                            <option value="2">Функції</option>
+                            <option value="3">Похідна</option>
+                            <option value="4">Тригонометрія</option>
+                            <option value="5">Планіметрія</option>
+                            <option value="6">Стереометрія</option>
+                            <option value="7">Комбінаторика</option>
+                        </select>
+                        <button onclick="generateTask()" class="btn-primary px-4 py-2 rounded-lg font-medium whitespace-nowrap">
+                            Нове завдання
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task Card -->
+                <div id="task-container" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8 min-h-[400px]">
+                    <div id="task-content" class="space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium w-fit" id="task-topic">Тема</span>
+                            <span class="text-slate-400 text-sm" id="task-difficulty">Складність: <span class="font-medium text-slate-600">Середня</span></span>
+                        </div>
+                        
+                        <div class="text-lg text-slate-800 leading-relaxed min-h-[60px]" id="task-text">
+                            Натисни "Нове завдання", щоб почати тренування
+                        </div>
+
+                        <div id="task-figure" class="hidden bg-slate-50 p-4 rounded-xl text-center">
+                            <!-- SVG figures -->
+                        </div>
+
+                        <div id="answer-section" class="hidden space-y-4">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="text" id="user-answer" placeholder="Ваша відповідь..." 
+                                    class="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl math-input text-lg focus:border-indigo-500 focus:outline-none"
+                                    onkeypress="if(event.key==='Enter') checkAnswer()">
+                                <button onclick="checkAnswer()" class="btn-primary px-6 py-3 rounded-xl font-semibold">
+                                    Перевірити
+                                </button>
+                            </div>
+                            
+                            <button onclick="toggleHint()" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-2 w-fit">
+                                <span id="hint-icon">💡</span> 
+                                <span id="hint-text-btn">Показати підказку</span>
+                            </button>
+                            
+                            <div id="hint-box" class="hint-reveal bg-amber-50 border border-amber-200 rounded-xl">
+                                <div class="p-4">
+                                    <p class="text-amber-800" id="hint-text"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="result-box" class="hidden rounded-xl p-4">
+                            <!-- Result message -->
+                        </div>
+
+                        <div id="solution-box" class="hidden bg-slate-50 rounded-xl p-6 border border-slate-200">
+                            <h4 class="font-semibold text-slate-900 mb-3">Розв'язання:</h4>
+                            <div id="solution-text" class="text-slate-700 space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200">
+                    <div class="text-sm text-slate-600">
+                        Серія правильних: <span class="font-bold text-emerald-600 text-lg" id="current-streak">0</span> 🔥
+                    </div>
+                    <div class="text-sm text-slate-600">
+                        Всього вирішено: <span class="font-bold text-indigo-600 text-lg" id="total-solved">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Screen -->
+        <div id="screen-exam" class="screen">
+            <div class="max-w-4xl mx-auto">
+                <!-- Exam Header -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-4 sm:p-6 mb-6 sticky top-20 z-30">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="text-center sm:text-left">
+                            <h2 class="text-xl font-bold text-slate-900">Симуляція НМТ 2026</h2>
+                            <p class="text-sm text-slate-600">23 завдання • 120 хвилин • 200 балів</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 sm:gap-6">
+                            <div class="text-center">
+                                <div class="text-2xl font-mono font-bold text-slate-800" id="exam-timer">120:00</div>
+                                <div class="text-xs text-slate-500">Залишилось</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-indigo-600" id="exam-progress">0/23</div>
+                                <div class="text-xs text-slate-500">Виконано</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="finishExam()" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200 transition">
+                            Завершити
+                        </button>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-4 flex flex-wrap gap-1 justify-center" id="exam-nav">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Exam Tasks -->
+                <div id="exam-tasks" class="space-y-6">
+                    <!-- Generated by JS -->
+                </div>
+
+                <div class="mt-8 text-center pb-8">
+                    <button onclick="finishExam()" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg shadow-lg">
+                        Завершити тестування
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory Screen -->
+        <div id="screen-theory" class="screen">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-slate-900 mb-8">Довідник формул та теорії</h2>
+                
+                <div class="space-y-6" id="theory-content">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="screen-profile" class="screen">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8 mb-6">
+                    <div class="flex flex-col sm:flex-row items-center gap-6 mb-8">
+                        <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                            Я
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <h2 class="text-2xl font-bold text-slate-900">Мій профіль</h2>
+                            <p class="text-slate-600 mt-1">
+                                Рівень <span id="profile-level" class="font-bold text-indigo-600 text-xl">1</span> • 
+                                <span id="profile-xp">0</span> XP
+                            </p>
+                            <div class="w-48 h-3 bg-slate-200 rounded-full mt-3 overflow-hidden">
+                                <div id="profile-xp-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievements -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Досягнення</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8" id="achievements-grid">
+                        <!-- Generated by JS -->
+                    </div>
+
+                    <!-- Topic Progress -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Прогрес по темах</h3>
+                    <div class="space-y-3" id="topic-progress-list">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+
+                <button onclick="resetProgress()" class="w-full py-3 border-2 border-red-300 text-red-600 rounded-xl font-medium hover:bg-red-50 transition">
+                    ⚠️ Скинути весь прогрес
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Exam Results Modal -->
+    <div id="exam-results" class="modal">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative">
+            <button onclick="closeExamResults()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500">✕</button>
+            
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-4 shadow-lg">
+                    🎓
+                </div>
+                <h2 class="text-3xl font-bold text-slate-900">Результати НМТ</h2>
+                <p class="text-slate-600 mt-2">Симуляція завершена</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="text-center p-4 bg-indigo-50 rounded-xl">
+                    <div class="text-3xl font-bold text-indigo-600" id="result-score">0</div>
+                    <div class="text-sm text-slate-600">Балів</div>
+                </div>
+                <div class="text-center p-4 bg-emerald-50 rounded-xl">
+                    <div class="text-3xl font-bold text-emerald-600" id="result-correct">0</div>
+                    <div class="text-sm text-slate-600">Правильних</div>
+                </div>
+                <div class="text-center p-4 bg-amber-50 rounded-xl">
+                    <div class="text-3xl font-bold text-amber-600" id="result-time">0</div>
+                    <div class="text-sm text-slate-600">Хвилин</div>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-8" id="result-details">
+                <!-- Detailed results -->
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="closeExamResults(); showScreen('home');" class="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition">
+                    На головну
+                </button>
+                <button onclick="closeExamResults(); startExam();" class="flex-1 py-3 btn-primary rounded-xl font-medium">
+                    Спробувати ще
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Скинути прогрес?</h3>
+            <p class="text-slate-600 mb-6">Всі ваші досягнення, статистика та історія будуть видалені назавжди.</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50">Скасувати</button>
+                <button onclick="confirmReset()" class="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Скинути</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA & STATE ====================
+        
+        const topics = [
+            { id: 0, title: "Числа та вирази", icon: "🔢", color: "from-blue-500 to-cyan-500", description: "Дійсні числа, корені, логарифми, тотожні перетворення", progress: 0, formulas: [
+                { name: "Корені", formula: "\\sqrt[n]{a^m} = a^{\\frac{m}{n}}" },
+                { name: "Логарифми", formula: "\\log_a b = \\frac{\\ln b}{\\ln a}" },
+                { name: "Властивості", formula: "\\log_a(bc) = \\log_a b + \\log_a c" }
+            ]},
+            { id: 1, title: "Рівняння та нерівності", icon: "⚖️", color: "from-emerald-500 to-teal-500", description: "Лінійні, квадратні, ірраціональні, показникові, логарифмічні", progress: 0, formulas: [
+                { name: "Квадратне рівняння", formula: "ax^2 + bx + c = 0, \\quad x = \\frac{-b \\pm \\sqrt{D}}{2a}" },
+                { name: "Дискримінант", formula: "D = b^2 - 4ac" },
+                { name: "Теорема Вієта", formula: "x_1 + x_2 = -\\frac{b}{a}, \\quad x_1 \\cdot x_2 = \\frac{c}{a}" }
+            ]},
+            { id: 2, title: "Функції", icon: "📈", color: "from-violet-500 to-purple-500", description: "Властивості функцій, графіки, перетворення", progress: 0, formulas: [
+                { name: "Лінійна", formula: "y = kx + b" },
+                { name: "Квадратична", formula: "y = ax^2 + bx + c" },
+                { name: "Показникова", formula: "y = a^x, \\quad a > 0" }
+            ]},
+            { id: 3, title: "Похідна та застосування", icon: "∂", color: "from-rose-500 to-pink-500", description: "Диференціювання, дослідження функцій, екстремуми", progress: 0, formulas: [
+                { name: "Визначення", formula: "f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}" },
+                { name: "Дотична", formula: "y = f(x_0) + f'(x_0)(x - x_0)" },
+                { name: "Екстремум", formula: "f'(x) = 0, \\quad f''(x) > 0 \\Rightarrow \\min" }
+            ]},
+            { id: 4, title: "Тригонометрія", icon: "📐", color: "from-amber-500 to-orange-500", description: "Формули, рівняння, перетворення", progress: 0, formulas: [
+                { name: "Основна", formula: "\\sin^2 x + \\cos^2 x = 1" },
+                { name: "Сума кутів", formula: "\\sin(x+y) = \\sin x \\cos y + \\cos x \\sin y" },
+                { name: "Подвійний кут", formula: "\\sin 2x = 2\\sin x \\cos x" }
+            ]},
+            { id: 5, title: "Планіметрія", icon: "📏", color: "from-cyan-500 to-blue-500", description: "Трикутники, чотирикутники, коло, вектори", progress: 0, formulas: [
+                { name: "Піфагор", formula: "c^2 = a^2 + b^2" },
+                { name: "Площа трикутника", formula: "S = \\frac{1}{2}ab\\sin C" },
+                { name: "Теорема косинусів", formula: "c^2 = a^2 + b^2 - 2ab\\cos C" }
+            ]},
+            { id: 6, title: "Стереометрія", icon: "🧊", color: "from-indigo-500 to-blue-600", description: "Многогранники, тіла обертання, об'єми", progress: 0, formulas: [
+                { name: "Об'єм призми", formula: "V = S_{осн} \\cdot h" },
+                { name: "Об'єм піраміди", formula: "V = \\frac{1}{3}S_{осн} \\cdot h" },
+                { name: "Об'єм кулі", formula: "V = \\frac{4}{3}\\pi R^3" }
+            ]},
+            { id: 7, title: "Комбінаторика та ймовірності", icon: "🎲", color: "from-fuchsia-500 to-pink-600", description: "Сполучення, перестановки, ймовірності, статистика", progress: 0, formulas: [
+                { name: "Сполучення", formula: "C_n^k = \\frac{n!}{k!(n-k)!}" },
+                { name: "Ймовірність", formula: "P(A) = \\frac{m}{n}" },
+                { name: "Середнє", formula: "\\bar{x} = \\frac{x_1 + x_2 + ... + x_n}{n}" }
+            ]}
+        ];
+
+        const achievements = [
+            { id: "first", name: "Перші кроки", desc: "Вирішіть 1 завдання", icon: "👶", unlocked: false },
+            { id: "ten", name: "Десятка", desc: "Вирішіть 10 завдань", icon: "🔟", unlocked: false },
+            { id: "fifty", name: "Майстер", desc: "Вирішіть 50 завдань", icon: "🎯", unlocked: false },
+            { id: "streak5", name: "Серія", desc: "5 правильних поспіль", icon: "🔥", unlocked: false },
+            { id: "exam", name: "Екзаменатор", desc: "Пройдіть симуляцію НМТ", icon: "📝", unlocked: false },
+            { id: "alltopics", name: "Всезнайка", desc: "Попрацюйте з усіма темами", icon: "🧠", unlocked: false }
+        ];
+
+        let state = {
+            level: 1,
+            xp: 0,
+            totalSolved: 0,
+            correctSolved: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            topicsVisited: [],
+            lastVisit: new Date().toDateString(),
+            streakDays: 1,
+            examHistory: []
+        };
+
+        let currentTask = null;
+        let examState = null;
+        let examTimerInterval = null;
+
+        // ==================== INITIALIZATION ====================
+
+        function init() {
+            loadState();
+            renderTopics();
+            renderTheory();
+            renderAchievements();
+            updateStats();
+            
+            // Check daily streak
+            const today = new Date().toDateString();
+            const lastVisit = new Date(state.lastVisit);
+            const diffDays = Math.floor((new Date(today) - lastVisit) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                state.streakDays++;
+            } else if (diffDays > 1) {
+                state.streakDays = 1;
+            }
+            state.lastVisit = today;
+            saveState();
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('nmtMathState');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                    state.topicsVisited = parsed.topicsVisited || [];
+                    
+                    if (parsed.topicProgress) {
+                        parsed.topicProgress.forEach((p, i) => {
+                            if (topics[i]) topics[i].progress = p;
+                        });
+                    }
+                    
+                    // Restore achievements
+                    if (parsed.achievements) {
+                        parsed.achievements.forEach((a, i) => {
+                            if (achievements[i]) achievements[i].unlocked = a.unlocked;
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error loading state:', e);
+                }
+            }
+        }
+
+        function saveState() {
+            const toSave = {
+                ...state,
+                topicsVisited: state.topicsVisited,
+                topicProgress: topics.map(t => t.progress),
+                achievements: achievements.map(a => ({ id: a.id, unlocked: a.unlocked }))
+            };
+            localStorage.setItem('nmtMathState', JSON.stringify(toSave));
+        }
+
+        // ==================== NAVIGATION ====================
+
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
+            });
+            
+            // Show target screen
+            const target = document.getElementById(`screen-${screenName}`);
+            if (target) {
+                target.style.display = 'block';
+                // Small delay to allow display:block to apply before adding active class for animation
+                setTimeout(() => target.classList.add('active'), 10);
+            }
+            
+            // Update nav active states
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+            });
+            
+            // Special renders
+            if (screenName === 'topics') renderTopicsDetailed();
+            if (screenName === 'profile') renderProfile();
+            if (screenName === 'trainer' && !currentTask) generateTask();
+            
+            window.scrollTo(0, 0);
+        }
+
+        // ==================== TOPICS ====================
+
+        function renderTopics() {
+            const grid = document.getElementById('topics-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = topics.map(t => `
+                <div onclick="startTopicTrainer(${t.id})" class="topic-card card-hover rounded-2xl p-6">
+                    <div class="w-12 h-12 bg-gradient-to-br ${t.color} rounded-xl flex items-center justify-center text-2xl mb-4 shadow-md">
+                        ${t.icon}
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-2">${t.title}</h3>
+                    <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
+                        <div class="bg-gradient-to-r ${t.color} h-2 rounded-full transition-all duration-500" style="width: ${t.progress}%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">${t.progress}% опановано</p>
+                </div>
+            `).join('');
+        }
+
+        function renderTopicsDetailed() {
+            const container = document.getElementById('topics-detailed');
+            if (!container) return;
+            
+            container.innerHTML = topics.map(t => `
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden card-hover" onclick="startTopicTrainer(${t.id})">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 bg-gradient-to-br ${t.color} rounded-xl flex items-center justify-center text-3xl shadow-md">
+                                ${t.icon}
+                            </div>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-medium">
+                                ${t.progress}% завершено
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">${t.title}</h3>
+                        <p class="text-slate-600 mb-4 text-sm">${t.description}</p>
+                        
+                        <div class="w-full bg-slate-200 rounded-full h-2 mb-4">
+                            <div class="bg-gradient-to-r ${t.color} h-2 rounded-full transition-all duration-500" style="width: ${t.progress}%"></div>
+                        </div>
+
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button onclick="startTopicTrainer(${t.id})" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
+                                Тренуватися
+                            </button>
+                            <button onclick="showTopicTheory(${t.id}); event.stopPropagation();" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition">
+                                Теорія
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function startTopicTrainer(topicId) {
+            if (!state.topicsVisited.includes(topicId)) {
+                state.topicsVisited.push(topicId);
+            }
+            saveState();
+            
+            const select = document.getElementById('trainer-filter');
+            if (select) select.value = topicId;
+            
+            const nameEl = document.getElementById('trainer-topic-name');
+            if (nameEl) nameEl.textContent = topics[topicId].title;
+            
+            showScreen('trainer');
+            generateTask(topicId);
+        }
+
+        function showTopicTheory(topicId) {
+            showScreen('theory');
+            setTimeout(() => {
+                const element = document.getElementById(`theory-${topicId}`);
+                if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        // ==================== TRAINER ====================
+
+        function filterTrainer() {
+            const filter = document.getElementById('trainer-filter').value;
+            const nameEl = document.getElementById('trainer-topic-name');
+            if (nameEl) {
+                nameEl.textContent = filter === 'all' ? 'Загальний режим (всі теми)' : topics[parseInt(filter)].title;
+            }
+            generateTask();
+        }
+
+        function generateTask(specificTopic = null) {
+            const filter = specificTopic !== null ? specificTopic : document.getElementById('trainer-filter').value;
+            const topicId = filter === 'all' ? Math.floor(Math.random() * 8) : parseInt(filter);
+            
+            const task = createTask(topicId);
+            currentTask = task;
+            
+            const topicEl = document.getElementById('task-topic');
+            const diffEl = document.getElementById('task-difficulty');
+            const textEl = document.getElementById('task-text');
+            const answerSection = document.getElementById('answer-section');
+            const resultBox = document.getElementById('result-box');
+            const solutionBox = document.getElementById('solution-box');
+            const hintBox = document.getElementById('hint-box');
+            
+            if (topicEl) topicEl.textContent = topics[topicId].title;
+            if (diffEl) {
+                const colors = { easy: 'emerald', medium: 'amber', hard: 'rose' };
+                const names = { easy: 'Легка', medium: 'Середня', hard: 'Важка' };
+                diffEl.innerHTML = `Складність: <span class="font-medium text-${colors[task.difficulty]}-600">${names[task.difficulty]}</span>`;
+            }
+            if (textEl) textEl.innerHTML = task.text;
+            
+            // Show figure if exists
+            const figureDiv = document.getElementById('task-figure');
+            if (figureDiv) {
+                if (task.figure) {
+                    figureDiv.innerHTML = task.figure;
+                    figureDiv.classList.remove('hidden');
+                } else {
+                    figureDiv.classList.add('hidden');
+                }
+            }
+            
+            if (answerSection) answerSection.classList.remove('hidden');
+            
+            const userAnswer = document.getElementById('user-answer');
+            if (userAnswer) {
+                userAnswer.value = '';
+                userAnswer.focus();
+            }
+            
+            if (resultBox) resultBox.classList.add('hidden');
+            if (solutionBox) solutionBox.classList.add('hidden');
+            if (hintBox) hintBox.classList.remove('active');
+            
+            const hintBtn = document.getElementById('hint-text-btn');
+            if (hintBtn) hintBtn.textContent = 'Показати підказку';
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function createTask(topicId) {
+            const templates = [
+                // Topic 0: Numbers
+                [
+                    {
+                        template: "Обчисліть: \\( \\sqrt{\\{{a}\\}} \\cdot \\sqrt{\\{{b}\\}} \\)",
+                        variables: [{name: 'a', min: 4, max: 25}, {name: 'b', min: 4, max: 25}],
+                        answer: "Math.sqrt({a} * {b})",
+                        hint: "Використайте властивість: \\( \\sqrt{a} \\cdot \\sqrt{b} = \\sqrt{ab} \\)",
+                        solution: "\\(\\sqrt{\\{{a}\\}} \\cdot \\sqrt{\\{{b}\\} = \\sqrt{\\{{a}\\} \\cdot \\{{b}\\} = \\sqrt{\\{{a*b}\\} = \\{Math.sqrt({a}*{b})\\}\\)",
+                        difficulty: "easy"
+                    },
+                    {
+                        template: "Спростіть: \\( \\log_2 \\{{a}\\} + \\log_2 \\{{b}\\} \\)",
+                        variables: [{name: 'a', min: 2, max: 8}, {name: 'b', min: 2, max: 8}],
+                        answer: "Math.log2({a} * {b})",
+                        hint: "\\(\\log_a b + \\log_a c = \\log_a(bc)\\)",
+                        solution: "\\(\\log_2(\\{{a}\\} \\cdot \\{{b}\\}) = \\log_2(\\{{a*b}\\}) = \\{Math.log2({a}*{b})\\}\\)",
+                        difficulty: "medium"
+                    }
+                ],
+                // Topic 1: Equations
+                [
+                    {
+                        template: "Розв'яжіть: \\( x^2 = \\{{a}\\} \\)",
+                        variables: [{name: 'a', min: 4, max: 100}],
+                        answer: "Math.sqrt({a})",
+                        hint: "Квадратний корінь з числа дає два значення: додатне та від'ємне",
+                        solution: "\\(x = \\pm\\sqrt{\\{{a}\\}} = \\pm\\{Math.sqrt({a})\\}\\)",
+                        difficulty: "easy"
+                    },
+                    {
+                        template: "Розв'яжіть: \\( 2^{x} = \\{{a}\\} \\)",
+                        variables: [{name: 'a', min: 2, max: 6}],
+                        answer: "{a}",
+                        hint: "Якщо \\(2^x = 2^n\\), то \\(x = n\\)",
+                        solution: "\\(2^x = 2^{\\{{a}\\}} \\Rightarrow x = \\{{a}\\}\\)",
+                        difficulty: "easy"
+                    }
+                ],
+                // Topic 2: Functions
+                [
+                    {
+                        template: "Знайдіть \\(f(2)\\), якщо \\(f(x) = x^2 + \\{{a}\\}x\\)",
+                        variables: [{name: 'a', min: 1, max: 5}],
+                        answer: "4 + 2*{a}",
+                        hint: "Підставте \\(x = 2\\) у функцію",
+                        solution: "\\(f(2) = 2^2 + \\{{a}\\} \\cdot 2 = 4 + \\{{2*a}\\} = \\{4 + 2*{a}\\}\\)",
+                        difficulty: "easy"
+                    }
+                ],
+                // Topic 3: Derivative
+                [
+                    {
+                        template: "Знайдіть похідну: \\(f(x) = x^{\\{{a}\\}\\)",
+                        variables: [{name: 'a', min: 2, max: 5}],
+                        answer: "{a}",
+                        hint: "\\((x^n)' = nx^{n-1}\\)",
+                        solution: "\\(f'(x) = \\{{a}\\}x^{\\{{a-1}\\}\\)",
+                        difficulty: "easy"
+                    }
+                ],
+                // Topic 4: Trigonometry
+                [
+                    {
+                        template: "Обчисліть: \\( \\sin(30^{\\circ}) + \\cos(60^{\\circ}) \\)",
+                        variables: [],
+                        answer: "1",
+                        hint: "\\(\\sin 30^{\\circ} = 0.5, \\cos 60^{\\circ} = 0.5\\)",
+                        solution: "\\(0.5 + 0.5 = 1\\)",
+                        difficulty: "easy"
+                    }
+                ],
+                // Topic 5: Planimetry
+                [
+                    {
+                        template: "Площа прямокутника зі сторонами \\({{a}}\\) та \\({{b}}\\)",
+                        variables: [{name: 'a', min: 3, max: 12}, {name: 'b', min: 3, max: 12}],
+                        answer: "{a}*{b}",
+                        hint: "\\(S = a \\cdot b\\)",
+                        solution: "\\(S = \\{{a}\\} \\cdot \\{{b}\\} = \\{{a*b}\\}\\)",
+                        difficulty: "easy",
+                        figure: `<svg viewBox="0 0 200 120" class="mx-auto w-full max-w-xs"><rect x="20" y="20" width="160" height="80" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/><text x="100" y="110" text-anchor="middle" font-size="14">{a}</text><text x="10" y="65" text-anchor="middle" font-size="14">{b}</text></svg>`
+                    }
+                ],
+                // Topic 6: Stereometry
+                [
+                    {
+                        template: "Об'єм куба з ребром \\({{a}}\\)",
+                        variables: [{name: 'a', min: 2, max: 5}],
+                        answer: "{a}*{a}*{a}",
+                        hint: "\\(V = a^3\\)",
+                        solution: "\\(V = \\{{a}\\}^3 = \\{{a*a*a}\\}\\)",
+                        difficulty: "easy"
+                    }
+                ],
+                // Topic 7: Combinatorics
+                [
+                    {
+                        template: "Скільки сполучень \\(C_{{n}}^2\\)?",
+                        variables: [{name: 'n', min: 3, max: 6}],
+                        answer: "{n}*({n}-1)/2",
+                        hint: "\\(C_n^2 = \\frac{n(n-1)}{2}\\)",
+                        solution: "\\(C_{\\{{n}\\}}^2 = \\frac{\\{{n}\\} \\cdot \\{{n-1}\\}}{2} = \\{{n*(n-1)/2}\\}\\)",
+                        difficulty: "medium"
+                    }
+                ]
+            ];
+            
+            const topicTasks = templates[topicId] || templates[0];
+            const task = topicTasks[Math.floor(Math.random() * topicTasks.length)];
+            
+            // Generate variables
+            const vars = {};
+            (task.variables || []).forEach(v => {
+                vars[v.name] = Math.floor(Math.random() * (v.max - v.min + 1)) + v.min;
+            });
+            
+            // Replace in template
+            let text = task.template;
+            let answer = task.answer;
+            let solution = task.solution;
+            
+            Object.keys(vars).forEach(key => {
+                const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+                const regex2 = new RegExp(`\\{${key}\\}`, 'g');
+                text = text.replace(regex, vars[key]);
+                answer = answer.replace(regex2, vars[key]);
+                solution = solution.replace(regex2, vars[key]);
+            });
+            
+            // Calculate answer
+            let finalAnswer;
+            try {
+                finalAnswer = eval(answer);
+                if (!Number.isInteger(finalAnswer)) {
+                    finalAnswer = Math.round(finalAnswer * 100) / 100;
+                }
+            } catch (e) {
+                finalAnswer = answer;
+            }
+            
+            return {
+                topicId,
+                text,
+                answer: finalAnswer,
+                hint: task.hint,
+                solution: solution,
+                difficulty: task.difficulty,
+                figure: task.figure ? text.replace(/\{\{(\w+)\}\}/g, (m, k) => vars[k]) : null
+            };
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('hint-box');
+            const hintBtn = document.getElementById('hint-text-btn');
+            const hintText = document.getElementById('hint-text');
+            
+            if (!hintBox || !currentTask) return;
+            
+            const isActive = hintBox.classList.contains('active');
+            
+            if (isActive) {
+                hintBox.classList.remove('active');
+                if (hintBtn) hintBtn.textContent = 'Показати підказку';
+            } else {
+                if (hintText) hintText.innerHTML = currentTask.hint;
+                hintBox.classList.add('active');
+                if (hintBtn) hintBtn.textContent = 'Сховати підказку';
+                if (window.MathJax) MathJax.typesetPromise();
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswerEl = document.getElementById('user-answer');
+            if (!userAnswerEl || !currentTask) return;
+            
+            const userAns = userAnswerEl.value.trim().replace(',', '.');
+            const resultBox = document.getElementById('result-box');
+            const solutionBox = document.getElementById('solution-box');
+            
+            if (!resultBox || !solutionBox) return;
+            
+            let isCorrect = false;
+            let userNum = parseFloat(userAns);
+            let correctNum = parseFloat(currentTask.answer);
+            
+            if (userAns === currentTask.answer.toString() || Math.abs(userNum - correctNum) < 0.01) {
+                isCorrect = true;
+            }
+            
+            state.totalSolved++;
+            
+            if (isCorrect) {
+                state.correctSolved++;
+                state.currentStreak++;
+                if (state.currentStreak > state.bestStreak) state.bestStreak = state.currentStreak;
+                
+                const xpGain = currentTask.difficulty === 'easy' ? 10 : currentTask.difficulty === 'medium' ? 15 : 25;
+                addXP(xpGain);
+                
+                const topic = topics[currentTask.topicId];
+                topic.progress = Math.min(100, topic.progress + 5);
+                
+                resultBox.className = 'rounded-xl p-4 bg-emerald-50 border border-emerald-200';
+                resultBox.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">✅</span>
+                        <div>
+                            <div class="font-bold text-emerald-800 text-lg">Правильно! +${xpGain} XP</div>
+                            <div class="text-sm text-emerald-600">Серія: ${state.currentStreak} 🔥</div>
+                        </div>
+                    </div>
+                `;
+                
+                checkAchievements();
+                triggerConfetti();
+            } else {
+                state.currentStreak = 0;
+                resultBox.className = 'rounded-xl p-4 bg-rose-50 border border-rose-200';
+                resultBox.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">❌</span>
+                        <div>
+                            <div class="font-bold text-rose-800 text-lg">Неправильно</div>
+                            <div class="text-sm text-rose-600">Правильна відповідь: <span class="font-bold">${currentTask.answer}</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultBox.classList.remove('hidden');
+            solutionBox.classList.remove('hidden');
+            
+            const solutionText = document.getElementById('solution-text');
+            if (solutionText) solutionText.innerHTML = currentTask.solution;
+            
+            if (window.MathJax) MathJax.typesetPromise();
+            
+            saveState();
+            updateStats();
+            renderTopics();
+        }
+
+        function addXP(amount) {
+            state.xp += amount;
+            const nextLevel = state.level * 100;
+            if (state.xp >= nextLevel) {
+                state.level++;
+                state.xp -= nextLevel;
+                triggerConfetti();
+            }
+            updateXPBar();
+        }
+
+        function updateXPBar() {
+            const nextLevel = state.level * 100;
+            const percent = (state.xp / nextLevel) * 100;
+            
+            const levelDisplay = document.getElementById('level-display');
+            const xpBar = document.getElementById('xp-bar');
+            const profileLevel = document.getElementById('profile-level');
+            const profileXp = document.getElementById('profile-xp');
+            const profileXpBar = document.getElementById('profile-xp-bar');
+            
+            if (levelDisplay) levelDisplay.textContent = state.level;
+            if (xpBar) xpBar.style.width = percent + '%';
+            if (profileLevel) profileLevel.textContent = state.level;
+            if (profileXp) profileXp.textContent = state.xp;
+            if (profileXpBar) profileXpBar.style.width = percent + '%';
+        }
+
+        function updateStats() {
+            const statTotal = document.getElementById('stat-total-solved');
+            const statAcc = document.getElementById('stat-accuracy');
+            const statStreak = document.getElementById('stat-streak');
+            const statBadges = document.getElementById('stat-badges');
+            const currentStreak = document.getElementById('current-streak');
+            const totalSolved = document.getElementById('total-solved');
+            
+            if (statTotal) statTotal.textContent = state.totalSolved;
+            if (statAcc) statAcc.textContent = state.totalSolved > 0 
+                ? Math.round((state.correctSolved / state.totalSolved) * 100) + '%' 
+                : '0%';
+            if (statStreak) statStreak.textContent = state.streakDays;
+            
+            const unlockedCount = achievements.filter(a => a.unlocked).length;
+            if (statBadges) statBadges.textContent = unlockedCount;
+            if (currentStreak) currentStreak.textContent = state.currentStreak;
+            if (totalSolved) totalSolved.textContent = state.totalSolved;
+            
+            updateXPBar();
+        }
+
+        function checkAchievements() {
+            const checks = {
+                'first': state.totalSolved >= 1,
+                'ten': state.totalSolved >= 10,
+                'fifty': state.totalSolved >= 50,
+                'streak5': state.currentStreak >= 5,
+                'exam': state.examHistory.length > 0,
+                'alltopics': state.topicsVisited.length >= 8
+            };
+            
+            let newUnlock = false;
+            achievements.forEach(a => {
+                if (!a.unlocked && checks[a.id]) {
+                    a.unlocked = true;
+                    newUnlock = true;
+                }
+            });
+            
+            if (newUnlock) {
+                saveState();
+                renderAchievements();
+            }
+        }
+
+        function renderAchievements() {
+            const grid = document.getElementById('achievements-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = achievements.map(a => `
+                <div class="p-4 rounded-xl border-2 ${a.unlocked ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300' : 'bg-slate-50 border-slate-200 opacity-60'}">
+                    <div class="text-3xl mb-2">${a.icon}</div>
+                    <div class="font-bold text-sm ${a.unlocked ? 'text-amber-900' : 'text-slate-500'}">${a.name}</div>
+                    <div class="text-xs ${a.unlocked ? 'text-amber-700' : 'text-slate-400'}">${a.desc}</div>
+                    ${a.unlocked ? '<div class="mt-2 text-xs font-bold text-amber-600">✓ Отримано</div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderProfile() {
+            renderAchievements();
+            
+            const topicList = document.getElementById('topic-progress-list');
+            if (!topicList) return;
+            
+            topicList.innerHTML = topics.map(t => `
+                <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+                    <div class="w-10 h-10 bg-gradient-to-br ${t.color} rounded-lg flex items-center justify-center text-lg">
+                        ${t.icon}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-slate-900">${t.title}</div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 mt-1">
+                            <div class="bg-gradient-to-r ${t.color} h-2 rounded-full" style="width: ${t.progress}%"></div>
+                        </div>
+                    </div>
+                    <div class="font-bold text-slate-600">${t.progress}%</div>
+                </div>
+            `).join('');
+        }
+
+        function triggerConfetti() {
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = ['#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#8b5cf6'][Math.floor(Math.random() * 5)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 1000);
+                }, i * 30);
+            }
+        }
+
+        // ==================== EXAM ====================
+
+        function startExam() {
+            // Clear previous exam
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            
+            examState = {
+                tasks: [],
+                answers: new Array(23).fill(null),
+                currentTime: 120 * 60,
+                startTime: Date.now(),
+                active: true
+            };
+            
+            // Generate 23 exam tasks
+            for (let i = 0; i < 23; i++) {
+                const topicId = i < 15 ? Math.floor(Math.random() * 6) : Math.floor(Math.random() * 8);
+                examState.tasks.push(createTask(topicId));
+            }
+            
+            renderExam();
+            showScreen('exam');
+            startExamTimer();
+            
+            // Mark achievement
+            const examAch = achievements.find(a => a.id === 'exam');
+            if (examAch && !examAch.unlocked) {
+                examAch.unlocked = true;
+                saveState();
+                renderAchievements();
+            }
+        }
+
+        function renderExam() {
+            const nav = document.getElementById('exam-nav');
+            const container = document.getElementById('exam-tasks');
+            
+            if (!nav || !container) return;
+            
+            // Navigation dots
+            nav.innerHTML = examState.tasks.map((t, i) => `
+                <button onclick="scrollToTask(${i})" 
+                    class="w-8 h-8 rounded-lg text-sm font-medium transition ${examState.answers[i] !== null ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}"
+                    id="nav-${i}">
+                    ${i + 1}
+                </button>
+            `).join('');
+            
+            // Tasks
+            container.innerHTML = examState.tasks.map((t, i) => `
+                <div id="exam-task-${i}" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 scroll-mt-40">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-medium">Завдання ${i + 1}</span>
+                        <span class="text-xs text-slate-400">${topics[t.topicId].title}</span>
+                    </div>
+                    
+                    <div class="text-lg text-slate-800 mb-4">${t.text}</div>
+                    
+                    ${t.figure ? `<div class="bg-slate-50 p-4 rounded-xl mb-4">${t.figure}</div>` : ''}
+                    
+                    <div class="flex gap-3">
+                        <input type="text" 
+                            id="exam-answer-${i}" 
+                            value="${examState.answers[i] || ''}"
+                            placeholder="Відповідь..." 
+                            class="flex-1 px-4 py-2 border-2 border-slate-200 rounded-lg math-input focus:border-indigo-500 focus:outline-none"
+                            onchange="updateExamAnswer(${i}, this.value)"
+                            onkeypress="if(event.key==='Enter') updateExamAnswer(${i}, this.value); if(event.key==='Enter' && ${i} < 22) scrollToTask(${i+1})">
+                        <button onclick="updateExamAnswer(${i}, document.getElementById('exam-answer-${i}').value)" class="btn-primary px-4 py-2 rounded-lg">
+                            Зберегти
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            updateExamProgress();
+            
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function updateExamAnswer(index, value) {
+            if (!examState) return;
+            examState.answers[index] = value.trim();
+            updateExamProgress();
+            
+            // Update nav button style
+            const navBtn = document.getElementById(`nav-${index}`);
+            if (navBtn) {
+                navBtn.classList.remove('bg-slate-200', 'text-slate-600');
+                navBtn.classList.add('bg-indigo-600', 'text-white');
+            }
+        }
+
+        function updateExamProgress() {
+            const answered = examState.answers.filter(a => a !== null && a !== '').length;
+            const progressEl = document.getElementById('exam-progress');
+            if (progressEl) progressEl.textContent = `${answered}/23`;
+        }
+
+        function scrollToTask(index) {
+            const element = document.getElementById(`exam-task-${index}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Focus input
+                setTimeout(() => {
+                    const input = document.getElementById(`exam-answer-${index}`);
+                    if (input) input.focus();
+                }, 300);
+            }
+        }
+
+        function startExamTimer() {
+            const timerEl = document.getElementById('exam-timer');
+            if (!timerEl) return;
+            
+            examTimerInterval = setInterval(() => {
+                if (!examState || !examState.active) return;
+                
+                examState.currentTime--;
+                
+                const minutes = Math.floor(examState.currentTime / 60);
+                const seconds = examState.currentTime % 60;
+                timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (examState.currentTime <= 600) { // Less than 10 minutes
+                    timerEl.classList.add('timer-warning');
+                }
+                
+                if (examState.currentTime <= 0) {
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function finishExam() {
+            if (!examState) return;
+            
+            examState.active = false;
+            if (examTimerInterval) clearInterval(examTimerInterval);
+            
+            // Calculate results
+            let correct = 0;
+            examState.tasks.forEach((t, i) => {
+                const userAns = (examState.answers[i] || '').replace(',', '.');
+                const userNum = parseFloat(userAns);
+                const correctNum = parseFloat(t.answer);
+                
+                if (userAns === t.answer.toString() || Math.abs(userNum - correctNum) < 0.01) {
+                    correct++;
+                }
+            });
+            
+            const score = Math.round((correct / 23) * 200);
+            const timeUsed = Math.floor((Date.now() - examState.startTime) / 60000);
+            
+            // Save to history
+            state.examHistory.push({ score, correct, date: new Date() });
+            saveState();
+            
+            // Show results
+            const modal = document.getElementById('exam-results');
+            const scoreEl = document.getElementById('result-score');
+            const correctEl = document.getElementById('result-correct');
+            const timeEl = document.getElementById('result-time');
+            const detailsEl = document.getElementById('result-details');
+            
+            if (scoreEl) scoreEl.textContent = score;
+            if (correctEl) correctEl.textContent = `${correct}/23`;
+            if (timeEl) timeEl.textContent = timeUsed;
+            
+            if (detailsEl) {
+                let detailsHTML = '';
+                if (score >= 180) detailsHTML = '<div class="p-4 bg-emerald-50 rounded-lg text-emerald-800 font-medium">🎉 Відмінний результат! Ти готовий до НМТ!</div>';
+                else if (score >= 150) detailsHTML = '<div class="p-4 bg-blue-50 rounded-lg text-blue-800 font-medium">👍 Добрий результат, але є куди рости</div>';
+                else if (score >= 100) detailsHTML = '<div class="p-4 bg-amber-50 rounded-lg text-amber-800 font-medium">⚠️ Середній результат, потрібно більше практики</div>';
+                else detailsHTML = '<div class="p-4 bg-rose-50 rounded-lg text-rose-800 font-medium">📚 Потрібно серйозно підготуватися</div>';
+                
+                detailsHTML += `<div class="mt-4 text-sm text-slate-600">Точність: ${Math.round((correct/23)*100)}% • Виконано завдань: ${examState.answers.filter(a => a).length}/23</div>`;
+                
+                detailsEl.innerHTML = detailsHTML;
+            }
+            
+            if (modal) modal.classList.add('active');
+            
+            // Award XP for exam
+            addXP(Math.floor(score / 10));
+        }
+
+        function closeExamResults() {
+            const modal = document.getElementById('exam-results');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // ==================== THEORY ====================
+
+        function renderTheory() {
+            const container = document.getElementById('theory-content');
+            if (!container) return;
+            
+            container.innerHTML = topics.map(t => `
+                <div id="theory-${t.id}" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-14 h-14 bg-gradient-to-br ${t.color} rounded-xl flex items-center justify-center text-3xl shadow-md">
+                            ${t.icon}
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-slate-900">${t.title}</h3>
+                            <p class="text-slate-600">${t.description}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        ${t.formulas.map(f => `
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div class="font-semibold text-slate-800 mb-2">${f.name}</div>
+                                <div class="text-lg text-slate-700">\\(${f.formula}\\)</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <button onclick="startTopicTrainer(${t.id})" class="mt-6 w-full py-3 btn-primary rounded-xl font-medium">
+                        Перейти до тренування
+                    </button>
+                </div>
+            `).join('');
+            
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        // ==================== RESET ====================
+
+        function resetProgress() {
+            const modal = document.getElementById('confirm-modal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function confirmReset() {
+            localStorage.removeItem('nmtMathState');
+            location.reload();
+        }
+
+        // ==================== START ====================
+
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Close modals on outside click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
